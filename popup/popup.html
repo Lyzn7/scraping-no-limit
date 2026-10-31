@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DataScraper - Content & Sentiment</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16M7 6v12M17 6v12" />
+          </svg>
+        </div>
+        <div>
+          <h1 class="app-title">DataScraper</h1>
+          <p class="app-subtitle">Content & Sentiment Extractor</p>
+        </div>
+      </div>
+      <div class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">Mendeteksi...</span>
+      </div>
+    </header>
+
+    <!-- Metrics Cards -->
+    <section class="metrics-grid">
+      <div class="metric-card total">
+        <div class="metric-label">Total Data</div>
+        <div class="metric-val" id="metricTotal">0</div>
+        <div class="metric-bar"><div class="fill total-fill" style="width: 100%;"></div></div>
+      </div>
+      <div class="metric-card positive">
+        <div class="metric-label">Positive</div>
+        <div class="metric-val" id="metricPositive">0</div>
+        <div class="metric-bar"><div class="fill pos-fill" id="barPositive" style="width: 0%;"></div></div>
+      </div>
+      <div class="metric-card neutral">
+        <div class="metric-label">Neutral</div>
+        <div class="metric-val" id="metricNeutral">0</div>
+        <div class="metric-bar"><div class="fill neu-fill" id="barNeutral" style="width: 0%;"></div></div>
+      </div>
+      <div class="metric-card negative">
+        <div class="metric-label">Negative</div>
+        <div class="metric-val" id="metricNegative">0</div>
+        <div class="metric-bar"><div class="fill neg-fill" id="barNegative" style="width: 0%;"></div></div>
+      </div>
+    </section>
+
+    <!-- Multi-Page Automation Section -->
+    <section class="automation-card" id="automationCard">
+      <div class="auto-header">
+        <div class="auto-title-area">
+          <span class="auto-badge-icon">⚡</span>
+          <div>
+            <div class="auto-title">Otomasi Multi-Page</div>
+            <div class="auto-desc">Pilih Limit 100 & Pindah Halaman Otomatis (Delay &ge; 3s)</div>
+          </div>
+        </div>
+        <button class="btn-icon-subtle" id="btnToggleAutoSettings" title="Pengaturan Otomasi">⚙️</button>
+      </div>
+
+      <!-- Quick Automation Config Drawer -->
+      <div class="auto-config-row" id="autoConfigRow">
+        <div class="auto-config-item">
+          <label for="autoLimitSelect">Limit Data:</label>
+          <select id="autoLimitSelect" class="form-select-sm">
+            <option value="100" selected>100 baris</option>
+            <option value="50">50 baris</option>
+            <option value="20">20 baris</option>
+          </select>
+        </div>
+        <div class="auto-config-item">
+          <label for="autoDelayInput">Delay Pindah:</label>
+          <div class="input-with-unit">
+            <input type="number" id="autoDelayInput" class="form-input-sm" value="3" min="3" max="60">
+            <span>detik</span>
+          </div>
+        </div>
+        <div class="auto-config-item">
+          <label for="autoMaxPages">Maks Halaman:</label>
+          <input type="number" id="autoMaxPages" class="form-input-sm" placeholder="Semua" min="1" max="999">
+        </div>
+      </div>
+
+      <!-- Action Buttons for Automation -->
+      <div class="auto-buttons-row">
+        <button class="btn btn-auto-start" id="btnStartAutomation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+          <span id="txtStartAuto">Mulai Otomasi (Limit 100 & Auto Next)</span>
+        </button>
+
+        <button class="btn btn-auto-stop hidden" id="btnStopAutomation">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="6" y="6" width="12" height="12"></rect>
+          </svg>
+          <span>Hentikan Otomasi</span>
+        </button>
+      </div>
+
+      <!-- Real-time Progress Bar during Automation -->
+      <div class="auto-progress-bar hidden" id="autoProgressBar">
+        <div class="auto-progress-info">
+          <span class="auto-pulse-dot"></span>
+          <span id="autoProgressStatus">Sedang berjalan: Halaman 1...</span>
+          <span class="auto-progress-badge" id="autoCollectedBadge">0 Data</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Action Buttons -->
+    <section class="actions-section">
+      <button class="btn btn-primary" id="btnDownloadCsv">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        <span>Download CSV</span>
+      </button>
+
+      <button class="btn btn-secondary" id="btnCopyCsv" title="Salin data format CSV ke clipboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" stroke-linecap="round" stroke-linejoin="round"></rect>
+          <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span>Salin CSV</span>
+      </button>
+
+      <button class="btn btn-icon" id="btnRefresh" title="Scrape Ulang Halaman">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      </button>
+
+      <button class="btn btn-icon" id="btnToggleSettings" title="Pengaturan Ekspor CSV">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+      </button>
+    </section>
+
+    <!-- Settings Drawer (Hidden by default) -->
+    <section class="settings-drawer hidden" id="settingsDrawer">
+      <div class="settings-title">⚙️ Opsi Ekspor CSV</div>
+      
+      <div class="setting-row">
+        <label for="delimiterSelect">Separator CSV:</label>
+        <select id="delimiterSelect" class="form-select">
+          <option value="," selected>Koma ( , ) - Standar Internasional</option>
+          <option value=";">Titik Koma ( ; ) - Excel Regional Indonesia</option>
+        </select>
+      </div>
+
+      <div class="setting-row">
+        <label>Kolom yang Disertakan:</label>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkContent" checked disabled>
+            <span>Content (Wajib)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkSentiment" checked disabled>
+            <span>Sentiment (Wajib)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkNo">
+            <span>Nomor Urut (No)</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkUsername">
+            <span>Username</span>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="chkUrl">
+            <span>Link Sumber</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <!-- Search & Filter Tab Bar -->
+    <section class="search-filter-section">
+      <div class="search-input-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Cari teks content...">
+        <button id="btnClearSearch" class="btn-clear hidden">&times;</button>
+      </div>
+
+      <div class="filter-pills">
+        <button class="pill active" data-filter="all" id="pillAll">Semua (<span id="countAll">0</span>)</button>
+        <button class="pill" data-filter="Positive" id="pillPos">Positive (<span id="countPos">0</span>)</button>
+        <button class="pill" data-filter="Neutral" id="pillNeu">Neutral (<span id="countNeu">0</span>)</button>
+        <button class="pill" data-filter="Negative" id="pillNeg">Negative (<span id="countNeg">0</span>)</button>
+      </div>
+    </section>
+
+    <!-- Table Preview Container -->
+    <section class="preview-section">
+      <div class="table-container" id="tableContainer">
+        <table class="data-table" id="dataTable">
+          <thead>
+            <tr>
+              <th style="width: 45px;">No</th>
+              <th>Content</th>
+              <th style="width: 100px; text-align: center;">Sentiment</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Empty / Error State -->
+      <div class="state-container hidden" id="emptyState">
+        <div class="state-icon">🔍</div>
+        <h3 id="emptyTitle">Tidak Ada Data Ditemukan</h3>
+        <p id="emptyDesc">Pastikan halaman memiliki tabel analitik media sosial seperti pada test.php.</p>
+        <button class="btn btn-secondary btn-sm" id="btnOpenTestPage">Buka Halaman Contoh (test_page.html)</button>
+      </div>
+
+      <!-- Loading State -->
+      <div class="state-container hidden" id="loadingState">
+        <div class="spinner"></div>
+        <p>Sedang mengekstrak data dari halaman...</p>
+      </div>
+    </section>
+
+    <!-- Footer Toast Notification -->
+    <div class="toast hidden" id="toast">
+      <span id="toastMessage">Berhasil mengekspor CSV!</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

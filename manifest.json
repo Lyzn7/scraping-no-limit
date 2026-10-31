@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "DataScraper - Content & Sentiment",
+  "version": "1.0.0",
+  "description": "Ekstensi Chrome untuk scraping data Content dan Sentiment dari tabel analitik media sosial ke format CSV.",
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["scripts/scraper.js", "scripts/automation.js", "scripts/content.js"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Scrape Content & Sentiment",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["test_page.html"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
